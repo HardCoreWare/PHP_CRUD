@@ -4,6 +4,9 @@ class sql_crud{
 
     private $connection;
 
+
+    // just creates a new connection of mySQL from sqli
+
     public function __construct($host,$user,$password,$database) {
 
         $this->connection = new mysqli($host,$user,$password,$database);
@@ -11,6 +14,9 @@ class sql_crud{
     }
 
 //-------------------------------------------------------------------------------------------------------------------------
+
+
+    // get the status of connection
 
     public function get_status(){
 
@@ -29,6 +35,16 @@ class sql_crud{
     }
 
 //-------------------------------------------------------------------------------------------------------------------------
+
+    /*validates a password and username and returns
+
+    0 invalid username
+
+    1 valid username but invalid password
+
+    2 valid username and password
+
+    */
 
     public function validate_password($table,$name_col,$password_col,$name,$password){
 
@@ -77,6 +93,14 @@ class sql_crud{
 
 //---------------------------------------------------------------------------------------------------------------------------
  
+/*
+
+returns single line or the first line of a query as an array of strings
+
+in the case of non existing lines the function will return an array of 2 null strings
+
+*/
+
 function get_line($q){
 
     $result = $this->connection->query($q);
@@ -101,6 +125,14 @@ function get_line($q){
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
+/*
+
+returns the full table of a query as a string matrix
+
+in the case of non existing lines the function will return a matrix of 2x2 null strings
+
+*/
+
     function get_table($q){
 
         $result = $this->connection->query($q);
@@ -124,6 +156,14 @@ function get_line($q){
     }
 
 //------------------------------------------------------------------------------------------------------------------------------
+
+/*
+
+returns the selected cell as a string
+
+or in the case of a null result the function returns a null string
+
+*/ 
 
     public function get_cell($q){
 
@@ -172,8 +212,5 @@ function get_line($q){
     }
 
 }
-
-
-
 
 ?>
