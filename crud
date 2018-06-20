@@ -1,0 +1,179 @@
+<?php
+
+class sql_crud{
+
+    private $connection;
+
+    public function __construct($host,$user,$password,$database) {
+
+        $this->connection = new mysqli($host,$user,$password,$database);
+
+    }
+
+//-------------------------------------------------------------------------------------------------------------------------
+
+    public function get_status(){
+
+        if($this->connection){
+
+            return true;
+
+        }
+
+        else{
+
+            return false;
+
+        }
+
+    }
+
+//-------------------------------------------------------------------------------------------------------------------------
+
+    public function validate_password($table,$name_col,$password_col,$name,$password){
+
+        $q = "select ".$name_col." , ".$password_col." from ".$table." where ".$name_col." = '".$name."'";
+
+        $result = $this->connection->query($q);
+
+        if($result->num_rows > 0){
+
+            if($row = $result-> fetch_assoc()){
+
+                $_name=$row[$name_col];
+
+                $_password=$row[$password_col];
+
+                if($password == $_password){
+
+                    return 2;
+
+                }
+
+
+                else{
+
+                    return 1;
+
+                }
+
+            }
+            
+            else {
+
+                return 0;
+
+            }
+
+        }
+
+        else{
+
+            return 0;
+
+        }
+
+    }
+
+//---------------------------------------------------------------------------------------------------------------------------
+ 
+function get_line($q){
+
+    $result = $this->connection->query($q);
+
+    if($result->num_rows > 0){
+
+        $line=$result->fetch_array(MYSQLI_NUM);
+
+        return $line;
+
+    }
+
+    else {
+
+        $null_line=array("","");
+
+        return $null_line;
+
+    }
+
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------
+
+    function get_table($q){
+
+        $result = $this->connection->query($q);
+    
+        if($result->num_rows > 0){
+    
+            $table=$result->fetch_all(MYSQLI_NUM);
+    
+            return $table;
+    
+        }
+    
+        else {
+    
+            $null_table=array(array("",""),array("",""));
+
+            return $null_table;
+    
+        }
+
+    }
+
+//------------------------------------------------------------------------------------------------------------------------------
+
+    public function get_cell($q){
+
+        $result = $this->connection->query($q);
+
+        if($result->num_rows > 0){
+
+            $line=$result->fetch_array(MYSQLI_NUM);
+
+            $cell=$line[0];
+    
+            return $line;
+    
+        }
+
+        else{
+
+            return "";
+
+        }
+
+    }
+
+    public function get_col($q){
+
+        $result = $this->connection->query($q);
+
+        if($result->num_rows > 0){
+
+            $col=array();
+
+            while($row = $result-> fetch_assoc()){
+
+                $line=$result->fetch_array(MYSQLI_NUM);
+
+            }
+    
+        }
+
+        else{
+
+            return "";
+
+        }
+
+    }
+
+}
+
+
+
+
+?>
