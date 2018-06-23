@@ -317,12 +317,12 @@ e = 0 doesn't gives echo
 
 */
 
-    public function update($q){
+    public function void_query($q){
 
         try{
-
+            
             $result = $this->connection->query($q);
-
+            
         }
 
         catch(Throwable $exception){
