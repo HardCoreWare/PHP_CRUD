@@ -1,6 +1,6 @@
 <?php
 
-class pdocrud{
+class pdo_crud{
 
     private $pdo;
 
@@ -20,13 +20,23 @@ class pdocrud{
       
     }
 
+    /*
+    pdo object turns null
+    */
+
     public function end(){
 
         $this->pdo=null;
 
     }
 
-    public function validatePassword($table,$user_col,$password_col,$user,$password){
+    /*
+    validates username and password
+    returns 2 when both are correct
+    returns 1 when the user exists but the password is incorrect
+    returns 0 when the user does not exist
+    */
+    public function validate_password($table,$user_col,$password_col,$user,$password){
 
         try{
         
@@ -91,33 +101,62 @@ class pdocrud{
 
     }
 
-    public function insertBlock($table,$data){
+    /*
+    insert data associative array matrix inside a table
+    */
+    public function insert_block($table,$data){
+        
+        try{
+    
+            foreach ($data as $i => $line) {
+        
+                $columns=implode(", ",array_keys($line));
+            
+                $values=implode("', '",array_values($line));
+               
+                $sql="INSERT INTO ".$table."(".$columns.")"." VALUES("."'".$values."'".");";
+ 
+                $this->pdo->query($sql);
+                
+            }
 
-        foreach ($data as $i => $line) {
-
-            $columns=implode(", ",array_keys($line));
-    
-            $values=implode("', '",array_values($line));
-    
-            $sql="INSERT INTO ".$table."(".$columns.")"." VALUES("."'".$values."'".");";
-    
-            $this->pdo->query($sql);
+        }
+        
+        catch(Exception $e){
+            
+            die($e);
+            
         }
 
     }
 
-    public function insertLine($table,$data){
+    /*
+    insert data associative array single line inside a table
+    */
+    public function insert_line($table,$data){
 
-            $columns=implode(", ",array_keys($data));
+        $columns=implode(", ",array_keys($data));
     
-            $values=implode("', '",array_values($data));
-    
-            $sql="INSERT INTO ".$table."(".$columns.")"." VALUES("."'".$values."'".");";
+        $values=implode("', '",array_values($data));
+
+        $sql="INSERT INTO ".$table."(".$columns.")"." VALUES("."'".$values."'".");";
+
+        try{
     
             $this->pdo->query($sql);
+        }
+        
+        catch(Exception $e){
+
+            die($e);
+
+        }
 
     }
 
+    /*
+    updates data as an associative array
+    */
     public function update($table,$data,$targets){
 
         $changes = array();
@@ -132,9 +171,19 @@ class pdocrud{
 
         $changes = implode(", ",$changes);
 
-        $sql = "UPDATE ".$table." SET ".$changes." WHERE ".$targets;
+        try{
+        
+            $sql = "UPDATE ".$table." SET ".$changes." WHERE ".$targets;
 
-        $this->pdo->query($sql);
+            $this->pdo->query($sql);
+
+        }
+
+        catch(Exception $e){
+
+            die($e);
+
+        }
 
     }
     
@@ -144,37 +193,68 @@ class pdocrud{
     
         $sql="SELECT ".$field_pack." FROM ".$table." WHERE ".$targets." ORDER BY ".$order;
     
-        $result=$this->pdo->query($sql,PDO::FETCH_ASSOC);
- 
-        $table=array();
 
-        foreach($result as $i=>$row){
+        try{
+
         
-            $line=array();
+            $result=$this->pdo->query($sql,PDO::FETCH_ASSOC);
+         
+            $table=array();
 
-            foreach($row as $key=>$value){
-            
-                $line[$key]=$value;
+            foreach($result as $i=>$row){
+                
+                $line=array();
+
+                foreach($row as $key=>$value){
+                    
+                    $line[$key]=$value;
+        
+                }
+        
+                $table[$i]=$line;
 
             }
-
-            $table[$i]=$line;
+        
+            return $table;
 
         }
 
-        return $table;
+        catch(Exception $e){
+
+            die($e);
+
+        }
 
     }
 
     public function delete($table,$targets){
 
-        $sql="DELETE FROM ".$table." WHERE ".$targets;
 
-        $this->pdo->query($sql);
+        
+        $sql="DELETE FROM ".$table." WHERE ".$targets;
+            
+        try{
+            
+            $this->pdo->query($sql);
+
+        }
+
+        catch(Exception $e){
+
+            die($e);
+
+        }
 
     }
 
+
 }
+
+
+
+
+?>
+
 
 
 
