@@ -1,5 +1,6 @@
 
 <?php
+
 class crud{
 
     private $pdo;
@@ -12,7 +13,7 @@ class crud{
 
     public function begin($host,$user,$password,$database){
         
-        $connection='mysql:host='.$host.';dbname='.$database;
+        $connection="mysql:host=".$host.";dbname=".$database;
 
         try{
 
@@ -25,114 +26,20 @@ class crud{
             die($e);
 
         }
-                      if($user_value[$user_col]==$user){
-52
-                
-53
-                    $password_query="SELECT ".$password_col." FROM ".$table." WHERE ".$user_col." = ?";
-54
-                    $password_result=$this->pdo->prepare($password_query);
-55
-                    $password_result->execute($user_params);
-56
-                
-57
-                    if($password_value=$password_result->fetch(PDO::FETCH_ASSOC)){
-58
-                    
-59
-                        if($password_value[$password_col]==$password){
-60
-​
-61
-                            return 2;
-62
-​
-63
-                        }
-64
-​
-65
-                        else{
-66
-​
-67
-                            return 1;
-68
-​
-69
-                        }
-70
-                
-71
-                    }
-72
-                
-73
-                    else{
-74
-                    
-75
-                        return 1;
-76
-                
-77
-                    }
-78
-​
-79
-                }
-80
-​
-81
-                else{
-82
-​
-83
-                    return 0;
-84
-​
-85
-                }
-86
-​
-87
-            }
-88
-​
-89
-            else{
-90
-​
-91
-                return 0;
-92
-​
-93
-            }
-94
-​
-95
-        }
-96
-​
-97
-        catch(Exception $e){
-98
-​
-99
-            die($e);
-100
-​
-101
-        }
+      
     }
+
+    /*********************************************************************************/
+
+
 
     /*
     pdo object turns null
     */
     public function end(){
+        
         $this->pdo=null;
+        
     }
 
     /*
@@ -185,8 +92,17 @@ class crud{
             die($e);
         }
     }
+
+    /*********************************************************************************/
+
+
+
     /*
     insert data associative array matrix inside a table
+    $data = array(
+        [0]=>array(["col0"]=>val0,["col1"]=>val1,["col2"]=>val2),
+        [1]=>array(["col0"]=>val0,["col1"]=>val1,["col2"]=>val2),
+        [2]=>array(["col0"]=>val0,["col1"]=>val1,["col2"]=>val2));
     */
     public function insert_block($table,$data){
         
@@ -195,11 +111,8 @@ class crud{
             foreach ($data as $i => $line) {
         
                 $columns=implode(", ",array_keys($line));
-            
                 $values=implode("', '",array_values($line));
-               
                 $sql="INSERT INTO ".$table."(".$columns.")"." VALUES("."'".$values."'".");";
- 
                 $this->pdo->query($sql);
                 
             }
@@ -211,8 +124,13 @@ class crud{
             
         }
     }
+
+    /*************************************************************************************/
+    
     /*
     insert data associative array single line inside a table
+    $data: [["col0"]=>"value0",["col1"]=>"value1",["col2"]=>"value2"];
+    $table: "Table";
     */
     public function insert_line($table,$data){
         $columns=implode(", ",array_keys($data));
@@ -228,38 +146,50 @@ class crud{
             die($e);
         }
     }
+
+    /***************************************************************************************/
+
+
     /*
-    updates data as an associative array
+    updates data
     */
     public function update($table,$data,$targets){
         $changes = array();
         foreach ($data as $key => $value) {
+
             $change = $key." = '".$value."'";
             $changes[]=$change;
         }
         $changes = implode(", ",$changes);
+
         try{
         
             $sql = "UPDATE ".$table." SET ".$changes." WHERE ".$targets;
             $this->pdo->query($sql);
         }
+
         catch(Exception $e){
             die($e);
         }
     }
+
+    /********************************************************************************/
+
     /*
     select from table
     */
-    public function select($table,$fields,$targets,$order,$type){
+    public function select($table,$cols,$targets,$order,$type){
         
-        $field_pack=implode(", ",$fields);    
+        $field_pack=implode(", ",$cols);    
 
         $sql="SELECT ".$field_pack." FROM ".$table." WHERE ".$targets." ORDER BY ".$order;
 
         try{
-            $result=$this->pdo->query($sql,PDO::FETCH_ASSOC);
-            if($type==0){
             
+            switch($type){
+            //
+            case "assoc":
+                $result=$this->pdo->query($sql,PDO::FETCH_ASSOC);
                 $table=[];
                 foreach($result as $row){
                             
@@ -275,16 +205,20 @@ class crud{
                     
                 return $table;
         
-            }
-            else if($type==1){
+            break;
+            //
+            case "mixed":
+
+                $result=$this->pdo->query($sql,PDO::FETCH_ASSOC);
                 $table=[];
                 $body=[];
-            
                 $head=[];
                 $h_s=false;
+
                 foreach($result as $i=>$row){
                             
                     $line=[];
+
                     if(!$h_s){
                         foreach($row as $key=>$value){            
                             $head[]=$key;
@@ -292,28 +226,64 @@ class crud{
                         }
                         $h_s=true;
                     }
+
                     else {
                     }
+
                     $line=[];
+
                     foreach($row as $key=>$value){            
                         $line[]=$value;
                     }
+
                     $body[]=$line;
                 }
+
                 $table['head']=$head;
                 $table['body']=$body;
                     
                 return $table;
+
+            break;
+            //
+            default:
+
+                $result=$this->pdo->query($sql,PDO::FETCH_ASSOC);
+                $table=[];
+
+                foreach($result as $row){
+                            
+                    $line=[];
+                    foreach($row as $key=>$value){            
+            
+                        $line[$key]=$value;
+        
+                    }
+                
+                    $table[]=$line;
+                }
+                    
+                return $table;
+
             }
+
         }
         catch(Exception $e){
             die($e);
             return null;
         }
     }
- 
-    public function delete($table,$targets){
-        $sql="DELETE FROM ".$table." WHERE ".$targets;
+
+    /*********************************************************************************/
+
+
+    /*
+    DELETE FROM Table
+    table   : table to change
+    target  : conditions
+    */
+    public function delete($table,$target){
+        $sql="DELETE FROM ".$table." WHERE ".$target;
             
         try{
             
@@ -325,3 +295,4 @@ class crud{
     }
 }
 ?>
+
